@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>
+      Insertion Sort
+    </title>
+    <style>
+
+      :root {
+        --canvas: 50vw;
+      }
+
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        max-height: 95vh;
+      }
+
+      h1 {
+        margin-top: 0;
+      }
+
+      #sortCanvas {
+        max-height: var(--canvas);
+        max-width: var(--canvas);
+        border: .2rem solid black;
+        border-radius: .2rem;
+      }
+
+      #status {
+        display: flex;
+        justify-content: space-around;
+        width: var(--canvas);
+        margin-top: 1rem;
+        font-size: 3rem;
+        transition: all 100ms;
+      }
+
+      #status > div {
+        padding: .5rem;
+        border: .2rem solid black;
+        border-radius: .5rem;
+      }
+
+      .green {
+        filter: opacity(1) !important;
+        text-shadow: 0 0 .1rem green,
+                      0 0 .2rem green,
+                      0 0 .4rem green,
+                      0 0 .8rem green;
+      }
+
+      .blue {
+        filter: opacity(1) !important;
+        text-shadow: 0 0 .1rem blue,
+                      0 0 .2rem blue,
+                      0 0 .4rem blue,
+                      0 0 .8rem blue;
+      }
+
+    </style>
+  </head>
+  <body>
+    <h1>
+      Insertion Sort
+    </h1>
+    <canvas id="sortCanvas">
+    </canvas>
+    <br />
+    <div id="status">
+      <div id="scan">
+        Scanning
+      </div>
+      <div id="write">
+        Writing
+      </div>
+    </div>
+  </body>
+  <script>
+    const getRandomNumber = function(floor, ceiling) {
+      //----------------------------------------------------//
+      //Gets random number from a preselected range         //
+      //integer-> floor: lower bound of the range           //
+      //integer-> ceiling: upper bound of the range         //
+      //----------------------------------------------------//
+
+      let range = (ceiling - floor) + 1;
+      return Math.floor((Math.random() * range) + floor);
+    }
+
+    const makeArray = function(length) {
+      //----------------------------------------------------//
+      //Returns an array filled with random numbers         //
+      //integer-> length: length of the array to be returned//
+      //----------------------------------------------------//
+
+      let array = []
+      for (let i = 0; i < length; i++) {
+        array[i] = getRandomNumber(1, 490);
+      }
+      return array;
+    }
+
+    const drawGraph = function(array, bottom = -1, top = -1, color = "blue") {
+      //----------------------------------------------------//
+      //Graphs the numbers in an array                      //
+      //array-> array: array filled with integers           //
+      //integer-> bottom: defines a lower limit for         //
+      //  different colored bars                            //
+      //integer-> top: defines an upper limit for           //
+      //  different colored bars                            //
+      //string-> color: defines the color for the range of  //
+      //  bars specified in the previous two arguments      //
+      //----------------------------------------------------//
+
+      context.clearRect(0, 0, 500, 500);
+
+
+      for (let i = 0; i < array.length; i++) {
+        context.beginPath();
+        context.fillRect((i * 4), (500-array[i]), 4, array[i]);
+        if (i <= top && i >= bottom) {
+          context.fillStyle = color;
+        } else {
+          context.fillStyle = "red";
+        }
+        context.closePath();
+      }
+
+    }
+
+    function sort2(array) {
+      //----------------------------------------------------//
+      //Uses an Insertion Sort to order an unordered array  //
+      //array-> array: array to be sorted                   //
+      //----------------------------------------------------//
+
+      let i = 1;
+      let index = i - 1;
+      let inserting = false;
+      let to, from, value;
+      let scanning = document.getElementById("scan");
+      let writing = document.getElementById("write");
+      let forLoop = setInterval(function() {
+        //--------------------------------------------------//
+        //Using a setInterval was the only way I could      //
+        //  animate the sorting properly, so this takes the //
+        //  place of a for loop with a nested while loop    //
+        //--------------------------------------------------//
+
+        if (inserting) {
+          //------------------------------------------------//
+          //This bit of my if tree handles shifting data    //
+          //  over so the current value can be placed in    //
+          //  the right spot                                //
+          //------------------------------------------------//
+
+          //
+          //Shift all data over one index
+          array[to] = array[to - 1];
+          drawGraph(array, to, i, "blue");
+          to--;
+
+          scanning.classList.remove("green");
+          writing.classList.add("blue");
+          if (to <= from) {
+            //----------------------------------------------//
+            //Once we're shifted to the right index we can  //
+            //  assign the proper value to the proper       //
+            //  position, reset our flags, and increment our//
+            //  counter to evaluate the next number         //
+            //----------------------------------------------//
+
+            inserting = false;
+            array[from] = value;
+            i++;
+            index = i - 1;
+          }
+        } else if (array[i] < array[i - 1]) {
+          //------------------------------------------------//
+          //If the number we're evaluating is smaller than  //
+          //  its neighbor, then it's unsorted and we need  //
+          //  to find where it goes                         //
+          //------------------------------------------------//
+
+          if (index === -1) {
+            //----------------------------------------------//
+            //If the index we're evaluating against drops   //
+            //  below 0 (ie, we've reached the end of the   //
+            //  array), we shift all the data over and      //
+            //  insert our number at position 0             //
+            //----------------------------------------------//
+
+            inserting = true;
+            to = i;
+            from = index + 1;
+            value = array[i];
+            drawGraph(array, index + 1, index + 1, "green");
+          } else if (array[i] >= array[index]) {
+            //----------------------------------------------//
+            //If the number we're evaluating against is     //
+            //  smaller, we know we've found the right place//
+            //  (for now). Shift all data over and insert   //
+            //  the value                                   //
+            //----------------------------------------------//
+
+            inserting = true;
+            to = i;
+            from = index + 1;
+            value = array[i];
+            drawGraph(array, index + 1, index + 1, "green");
+          } else {
+            //----------------------------------------------//
+            //If we're not at position 0 and our number is  //
+            //  larger than the one we're evaluating        //
+            //  against, we need to evaluate the next lower //
+            //  index.                                      //
+            //----------------------------------------------//
+
+            drawGraph(array, index + 1, index + 1, "black");
+            scanning.classList.add("green");
+            writing.classList.remove("blue");
+            index--;
+          }
+        } else {
+          //------------------------------------------------//
+          //If the number we're evaluating is larger than   //
+          //  its neighbor, then it's sorted (for now). We  //
+          //  need to evaluate the next number in the array //
+          //------------------------------------------------//
+
+          i++;
+          drawGraph(array, index + 1, index + 1, "green");
+          index = i - 1;
+        }
+
+        if (i > array.length) {
+          //------------------------------------------------//
+          //If the index of the number we want to evaluate  //
+          //  (i) is larger than the length of the array    //
+          //  then we know we're done evaluating the array  //
+          //  and can clear the interval and draw the final,//
+          //  sorted graph.                                 //
+          //------------------------------------------------//
+
+          clearInterval(forLoop);
+          scanning.classList.remove("green");
+          writing.classList.remove("blue");
+          drawGraph(array);
+        }
+      }, 1);
+    }
+
+    let x = 0;
+    let canvas = document.getElementById("sortCanvas");
+    canvas.height = 500;
+    canvas.width = 500;
+    let context = canvas.getContext("2d");
+
+    let size = 125;
+
+    let array = makeArray(size);
+    drawGraph(array);
+    sort2(array);
+
+  </script>
+</html>

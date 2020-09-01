@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>
+      Insertion Sort
+    </title>
+    <style>
+
+      :root {
+        --canvas: 500px;
+      }
+
+      body {
+        display: flex;
+        justify-content: center;
+      }
+
+      #sortCanvas {
+        height: var(--canvas);
+        width: var(--canvas);
+        /*background-color: black;*/
+      }
+
+
+    </style>
+  </head>
+  <body>
+    <canvas id="sortCanvas">
+    </canvas>
+  </body>
+  <script>
+    const getRandomNumber = function(floor, ceiling) {
+      //----------------------------------------------------//
+      //Gets random number from a preselected range         //
+      //integer-> floor: lower bound of the range           //
+      //integer-> ceiling: upper bound of the range         //
+      //----------------------------------------------------//
+
+      let range = (ceiling - floor) + 1;
+      return Math.floor((Math.random() * range) + floor);
+    }
+
+    const makeArray = function(length) {
+      let array = []
+      for (let i = 0; i < length; i++) {
+        array[i] = getRandomNumber(1, 490);
+      }
+      return array;
+    }
+
+    const drawGraph = function(array, begin, current = -1) {
+
+      context.clearRect(0, 0, 500, 500);
+
+
+      for (let i = 0; i < array.length; i++) {
+        context.beginPath();
+        context.moveTo((begin + i), 490);
+        context.lineTo((begin + i), (490 - array[i]));
+        if (i === (current - 1)) {
+          context.strokeStyle = "blue";
+        } else {
+          context.strokeStyle = "red";
+        }
+        //context.strokeStyle = "red";
+        context.stroke();
+        context.closePath();
+      }
+
+    }
+
+    function sort2(array) {
+
+      const insert = function(value, to, from) {
+        for (let i = to; i >= from; i--) {
+          array[i] = array[i - 1];
+        }
+        return value;
+      }
+
+      let i = 1;
+
+      let inserting = false;
+      let rawCount = 0;
+      let to, from, value;
+      let forLoop = setInterval(function() {
+
+        let index = 0;
+        if (array[i] < array[i - 1]) {
+          index = i - 1;
+
+          let run = true;
+          let inserting = false;
+          let to, from, value;
+
+          while (run) {
+
+
+            if (index === -1) {
+              array[0] = insert(array[i], i, (index + 1));
+              run = false;
+            } else if (array[i] >= array[index]) {
+              array[index + 1] = insert(array[i], i, (index + 1));
+              run = false;
+            } else {
+              index--;
+            }
+          }
+
+        } else {
+        }
+
+
+        drawGraph(array, 10, index + 1);
+
+        i++;
+        if (i > array.length) {
+          clearInterval(forLoop);
+        }
+      }, 20);
+    }
+
+    let x = 0;
+    let canvas = document.getElementById("sortCanvas");
+    canvas.height = 500;
+    canvas.width = 500;
+    let context = canvas.getContext("2d");
+
+    let size = 480;
+
+    let array = makeArray(size);
+
+    drawGraph(array, 10);
+    sort2(array);
+
+  </script>
+</html>

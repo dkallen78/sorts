@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>
+      Insertion Sort
+    </title>
+    <style>
+
+      :root {
+        --canvas: 500px;
+      }
+
+      body {
+        display: flex;
+        justify-content: center;
+      }
+
+      #sortCanvas {
+        height: var(--canvas);
+        width: var(--canvas);
+        /*background-color: black;*/
+      }
+
+
+    </style>
+  </head>
+  <body>
+    <canvas id="sortCanvas">
+    </canvas>
+  </body>
+  <script>
+    const getRandomNumber = function(floor, ceiling) {
+      //----------------------------------------------------//
+      //Gets random number from a preselected range         //
+      //integer-> floor: lower bound of the range           //
+      //integer-> ceiling: upper bound of the range         //
+      //----------------------------------------------------//
+
+      let range = (ceiling - floor) + 1;
+      return Math.floor((Math.random() * range) + floor);
+    }
+
+    const makeArray = function(length) {
+      let array = []
+      for (let i = 0; i < length; i++) {
+        array[i] = getRandomNumber(1, 490);
+      }
+      return array;
+    }
+
+    const drawGraph = function(array, begin) {
+
+      //context.clearRect(0, 0, 500, 500);
+      context.strokeStyle = "red";
+
+      for (let i = 0; i < array.length; i++) {
+        context.beginPath();
+        context.moveTo((begin + i), 490);
+        context.lineTo((begin + i), (490 - array[i]));
+
+        context.stroke();
+        context.closePath();
+      }
+
+    }
+
+    const insertionSort = function(array) {
+
+      const insert = function(value, to, from) {
+        for (let i = to; i >= from; i--) {
+          array[i] = array[i - 1];
+          //drawGraph(array);
+        }
+        return value;
+      }
+
+      for (let i = 1; i < array.length; i++) {
+        //console.log(array);
+
+        if (array[i] < array[i - 1]) {
+          //console.log(`${array[i]} < ${array[i-1]}, unsorted`);
+          let index = i - 1;
+          run = true;
+
+          while (run) {
+            if (index === -1) {
+              //console.log(`index = -1, inserting ${array[i]} into first position`);
+              array[0] = insert(array[i], i, (index + 1));
+
+              run = false;
+            } else if (array[i] >= array[index]) {
+              //console.log(`index = ${index}, ${array[i]} >= ${array[index]}, inserting`);
+              array[index + 1] = insert(array[i], i, (index + 1));
+
+              run = false;
+            } else {
+              //console.log(`index = ${index}, ${array[i]} < ${array[index]}, going deeper...`);
+
+              index--;
+            }
+
+          }
+
+        } else {
+          //console.log(`${array[i]} > ${array[i-1]}, placed correctly`);
+        }
+        //drawGraph(array);
+      }
+
+      drawGraph(array, 20 + size);
+    }
+
+    let x = 0;
+    let canvas = document.getElementById("sortCanvas");
+    canvas.height = 500;
+    canvas.width = 500;
+    let context = canvas.getContext("2d");
+
+    let size = 200
+
+    let array = makeArray(size);
+
+    drawGraph(array, 10);
+    insertionSort(array);
+
+  </script>
+</html>

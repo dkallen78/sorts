@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>
+      Merge Sort
+    </title>
+    <style>
+
+      :root {
+        --canvas: 50vw;
+      }
+
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        max-height: 95vh;
+      }
+
+      #sortCanvas {
+        max-height: var(--canvas);
+        max-width: var(--canvas);
+        border: .2rem solid black;
+        border-radius: .2rem;
+      }
+
+
+    </style>
+  </head>
+  <body>
+    <h1>
+      Merge Sort
+    </h1>
+    <canvas id="sortCanvas">
+    </canvas>
+  </body>
+  <script>
+    const getRandomNumber = function(floor, ceiling) {
+      //----------------------------------------------------//
+      //Gets random number from a preselected range         //
+      //integer-> floor: lower bound of the range           //
+      //integer-> ceiling: upper bound of the range         //
+      //----------------------------------------------------//
+
+      let range = (ceiling - floor) + 1;
+      return Math.floor((Math.random() * range) + floor);
+    }
+
+    const makeArray = function(length) {
+      //----------------------------------------------------//
+      //Returns an array filled with random numbers         //
+      //integer-> length: length of the array to be returned//
+      //----------------------------------------------------//
+
+      let array = []
+      for (let i = 0; i < length; i++) {
+        array[i] = getRandomNumber(1, 490);
+      }
+      return array;
+    }
+
+    const drawGraph = function(array, bottom = -1, top = -1, color = "blue", special = -1, color2 = "red") {
+      //----------------------------------------------------//
+      //Graphs the numbers in an array                      //
+      //array-> array: array filled with integers           //
+      //integer-> bottom: defines a lower limit for         //
+      //  different colored bars                            //
+      //integer-> top: defines an upper limit for           //
+      //  different colored bars                            //
+      //string-> color: defines the color for the range of  //
+      //  bars specified in the previous two arguments      //
+      //integer-> special: defines a column that needs to   //
+      //  be offset from the range                          //
+      //string-> color2: color of the offset column         //
+      //----------------------------------------------------//
+
+      context.clearRect(0, 0, 500, 500);
+
+      for (let i = 0; i < array.length; i++) {
+        if (i === special) {
+          context.strokeStyle = color2;
+        } else if (i <= top && i >= bottom) {
+          context.strokeStyle = color;
+        } else {
+          context.strokeStyle = "red";
+        }
+        context.beginPath();
+        context.moveTo(i,500);
+        context.lineTo(i, (500-array[i]));
+        context.stroke()
+        context.closePath();
+      }
+
+    }
+
+    function sort(array) {
+      //----------------------------------------------------//
+      //Performs a merge sort on an unordered array of      //
+      //  randomly generated numbers                        //
+      //array-> array: array to be sorted                   //
+      //----------------------------------------------------//
+
+      function mash(a, b) {
+        //--------------------------------------------------//
+        //Superimposes array a onto array b                 //
+        //array-> a: array to superimose onto b             //
+        //array-> b: array to be superimposed upon by a     //
+        //--------------------------------------------------//
+
+        let holder = b.slice(a.length);
+        for (let i = a.length - 1; i >= 0; i--) {
+          holder.unshift(a[i]);
+        }
+        return holder;
+
+      }
+
+      let sortUnit = 1;
+      let sortSize = 2;
+      let i = 0;
+      let index1 = 0;
+      let max1 = 1;
+      let index2 = index1 + sortUnit;
+      let max2 = max1 + sortUnit;
+      let slate = [];
+      let sortLoop = setInterval(function() {
+        //------------------------------------------------//
+        //Does multiple sort passes, sorting groups of    //
+        //  numbers and then MERGES those smaller sorted  //
+        //  groups together                               //
+        //------------------------------------------------//
+
+        if (index1 >= max1 && index2 < max2) {
+          //----------------------------------------------//
+          //If we've reached the end of our first group   //
+          //  and our second group still has data, we add //
+          //  it to our slate                             //
+          //----------------------------------------------//
+
+          slate[i] = array[index2];
+          i++;
+          index2++;
+          drawGraph(mash(slate, array), i, i, "blue");
+        } else if (index2 >= max2 && index1 < max1) {
+          //----------------------------------------------//
+          //If we've reached the end of our second group  //
+          //  and our first group still has data, we add  //
+          //  it to our slate                             //
+          //----------------------------------------------//
+
+          slate[i] = array[index1];
+          i++;
+          index1++;
+          drawGraph(mash(slate, array), i, i, "blue");
+        } else if (index1 >= max1 && index2 >= max2) {
+          //----------------------------------------------//
+          //If we've finished sorting both groups of data //
+          //  we can move on to the next pair of groups   //
+          //----------------------------------------------//
+
+          index1 = i;
+          max1 = index1 + sortUnit;
+          index2 = max1;
+          max2 = index2 + sortUnit;
+        } else if (index2 >= array.length) {
+          //----------------------------------------------//
+          //If there is no data in the second group to    //
+          //  compare with data in the first, we write    //
+          //  the first group's data to the slate         //
+          //----------------------------------------------//
+
+          slate[i] = array[index1];
+          index1++;
+          i++;
+          drawGraph(mash(slate, array), i, i, "blue");
+        } else if (array[index1] < array[index2]) {
+          //----------------------------------------------//
+          //If the number we're comparing from the first  //
+          //  group is smaller than the number we're      //
+          //  comparing it with in the second, we write   //
+          //  the first number to the slate               //
+          //----------------------------------------------//
+
+          slate[i] = array[index1];
+          index1++;
+          i++;
+          drawGraph(mash(slate, array), i, i, "blue");
+        } else {
+          //----------------------------------------------//
+          //If the number we're comparing from the second //
+          //  group is smaller than the number we're      //
+          //  comparing it with in the first, we write    //
+          //  the second number to the slate              //
+          //----------------------------------------------//
+
+          slate[i] = array[index2];
+          index2++;
+          i++;
+          drawGraph(mash(slate, array), i, i, "blue");
+        }
+
+        if (i >= array.length) {
+          //----------------------------------------------//
+          //If the position in the slate we are writin to //
+          //  is greater than the number of elements in   //
+          //  the original array, we update our group size//
+          //  and reset our index variables               //
+          //----------------------------------------------//
+
+          if (sortSize > array.length) {
+            //--------------------------------------------//
+            //If the sortSize is greater than the size of //
+            //  the array, then there's nothing left to   //
+            //  sort and we can clear the loop interval   //
+            //--------------------------------------------//
+
+            clearInterval(sortLoop);
+            array = slate.slice();
+            drawGraph(array);
+          }
+          array = slate.slice();
+          slate = [];
+          i = 0;
+          sortUnit = sortSize;
+          sortSize *= 2;
+          index1 = 0;
+          max1 = index1 + sortUnit;
+          index2 = max1;
+          max2 = index2 + sortUnit;
+        }
+
+      }, 1);
+    }
+
+    let canvas = document.getElementById("sortCanvas");
+    canvas.height = 500;
+    canvas.width = 500;
+    let context = canvas.getContext("2d");
+
+    let size = 500;
+
+    let array = makeArray(size);
+    drawGraph(array);
+    sort(array);
+
+
+  </script>
+</html>

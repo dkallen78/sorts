@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>
+      Merge Sort
+    </title>
+    <style>
+
+      :root {
+        --canvas: 50vw;
+      }
+
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        max-height: 95vh;
+      }
+
+      #sortCanvas {
+        max-height: var(--canvas);
+        max-width: var(--canvas);
+        border: .2rem solid black;
+        border-radius: .2rem;
+      }
+
+
+    </style>
+  </head>
+  <body>
+    <h1>
+      Merge Sort
+    </h1>
+    <canvas id="sortCanvas">
+    </canvas>
+  </body>
+  <script>
+    const getRandomNumber = function(floor, ceiling) {
+      //----------------------------------------------------//
+      //Gets random number from a preselected range         //
+      //integer-> floor: lower bound of the range           //
+      //integer-> ceiling: upper bound of the range         //
+      //----------------------------------------------------//
+
+      let range = (ceiling - floor) + 1;
+      return Math.floor((Math.random() * range) + floor);
+    }
+
+    const makeArray = function(length) {
+      //----------------------------------------------------//
+      //Returns an array filled with random numbers         //
+      //integer-> length: length of the array to be returned//
+      //----------------------------------------------------//
+
+      let array = []
+      for (let i = 0; i < length; i++) {
+        array[i] = getRandomNumber(1, 490);
+      }
+      return array;
+    }
+
+    const drawGraph = function(array, bottom = -1, top = -1, color = "blue", special = -1, color2 = "red") {
+      //----------------------------------------------------//
+      //Graphs the numbers in an array                      //
+      //array-> array: array filled with integers           //
+      //integer-> bottom: defines a lower limit for         //
+      //  different colored bars                            //
+      //integer-> top: defines an upper limit for           //
+      //  different colored bars                            //
+      //string-> color: defines the color for the range of  //
+      //  bars specified in the previous two arguments      //
+      //integer-> special: defines a column that needs to   //
+      //  be offset from the range                          //
+      //string-> color2: color of the offset column         //
+      //----------------------------------------------------//
+
+      context.clearRect(0, 0, 500, 500);
+
+
+      for (let i = 0; i < array.length; i++) {
+        if (i === special) {
+          context.fillStyle = color2;
+        } else if (i <= top && i >= bottom) {
+          context.fillStyle = color;
+        } else {
+          context.fillStyle = "red";
+        }
+        context.beginPath();
+        context.fillRect((i * 4), (500-array[i]), 4, array[i]);
+        context.closePath();
+      }
+
+    }
+
+    function sort(array) {
+
+      function mash(a, b) {
+        let holder = b.slice(a.length);
+        for (let i = a.length - 1; i >= 0; i--) {
+          holder.unshift(a[i]);
+        }
+        /*console.log("holder");
+        console.log(holder);
+        console.log("slate");
+        console.log(slate);
+        console.log("array");
+        console.log(array);*/
+        return holder;
+
+      }
+
+      let sortUnit = 1;
+      let sortSize = 2;
+      let i = 0;
+      let sort = 1;
+      let index1 = 0;
+      let max1 = 1;
+      let index2 = index1 + sortUnit;
+      let max2 = max1 + sortUnit;
+      let slate = [];
+      let write = [];
+      let sortLoop = setInterval(function() {
+
+        /*if (array[index] < array[index + sortUnit]) {
+          slate[index] = array[index];
+          slate[index + sortUnit] = array[index + sortUnit];
+        } else {
+          slate[index] = array[index + sortUnit];
+          slate[index + sortUnit] = array[index];
+        }
+        index += sortSize;*/
+        //console.log(array);
+        //console.log(`comparing ${array[index1]} and ${array[index2]}`);
+        //console.log(`index1 ${index1}, max1 ${max1}; index2 ${index2}, max2 ${max2}`);
+
+        if (index1 >= max1 && index2 < max2) {
+          //console.log(`nothing to compare ${array[index2]} with`);
+          slate[i] = array[index2];
+          //console.log(slate);
+          i++;
+          index2++;
+          drawGraph(mash(slate, array), i, i, "blue");
+        } else if (index2 >= max2 && index1 < max1) {
+          //console.log(`nothing to compare ${array[index1]} with`);
+          slate[i] = array[index1];
+          //console.log(slate);
+          i++;
+          index1++;
+          drawGraph(mash(slate, array), i, i, "blue");
+        } else if (index1 >= max1 && index2 >= max2) {
+          //console.log("next pair");
+
+          index1 = i;
+          max1 = index1 + sortUnit;
+          index2 = max1;
+          max2 = index2 + sortUnit;
+          //console.log(`index1 ${index1}, max1 ${max1}; index2 ${index2}, max2 ${max2}`);
+        } else if (index2 >= array.length) {
+          //console.log(`end of array, inserting ${array[index1]}`);
+          slate[i] = array[index1];
+          //console.log(slate);
+          //index2 = max2;
+          index1++;
+          i++;
+          drawGraph(mash(slate, array), i, i, "blue");
+        } else if (array[index1] < array[index2]) {
+          //console.log(`${array[index1]} is less than ${array[index2]}`);
+          slate[i] = array[index1];
+          //console.log(slate);
+          index1++;
+          i++;
+          drawGraph(mash(slate, array), i, i, "blue");
+        } else {
+          //console.log(`${array[index2]} is less than ${array[index1]}`);
+          slate[i] = array[index2];
+          //console.log(slate);
+          index2++;
+          i++;
+          drawGraph(mash(slate, array), i, i, "blue");
+        }
+
+
+
+        if (i >= array.length) {
+          if (sortSize > array.length * 2) {
+            console.log("stopped");
+            console.log(`sortSize ${sortSize}`);
+            clearInterval(sortLoop);
+            drawGraph(array);
+          }
+          array = slate.slice();
+          console.log(`sortSize ${sortSize}`);
+          //console.log("bigger groups");
+          //console.log(array);
+          slate = [];
+          i = 0;
+          sortUnit = sortSize;
+          sortSize *= 2;
+          sort++;
+          index1 = 0;
+          max1 = index1 + sortUnit;
+          index2 = max1;
+          max2 = index2 + sortUnit;
+          /*if (sortSize > array.length) {
+            console.log("stopped");
+            console.log(`sortSize ${sortSize}`);
+            clearInterval(sortLoop);
+            drawGraph(array);
+          }*/
+          //console.log(`index1 ${index1}, max1 ${max1}; index2 ${index2}, max2 ${max2}`);
+        }
+
+      }, 1);
+    }
+
+    let canvas = document.getElementById("sortCanvas");
+    canvas.height = 500;
+    canvas.width = 500;
+    let context = canvas.getContext("2d");
+
+    let size = 125;
+
+    let array = makeArray(size);
+    drawGraph(array);
+    console.log(array);
+    sort(array);
+
+
+  </script>
+</html>
