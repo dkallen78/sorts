@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>
-      Bubble Sort
+      Comb Sort
     </title>
     <style>
 
@@ -31,13 +31,12 @@
   </head>
   <body>
     <h1>
-      Bubble Sort
+      Comb Sort
     </h1>
     <canvas id="sortCanvas">
     </canvas>
   </body>
   <script>
-
     const getRandomNumber = function(floor, ceiling) {
       //----------------------------------------------------//
       //Gets random number from a preselected range         //
@@ -86,7 +85,7 @@
         } else if (i <= top && i >= bottom) {
           context.fillStyle = color;
         } else {
-          context.fillStyle = "green";
+          context.fillStyle = "red";
         }
         context.beginPath();
         context.fillRect((i * 4), (500-array[i]), 4, array[i]);
@@ -110,64 +109,53 @@
       }
 
       let i = 0;
-      let limit = array.length - 1;
-      let swapped = false;
+      let gap = array.length - 1;
+      let shrink = 1.3;
+      let sorted = false;
+      let lastRound = false;
 
       let sortLoop = setInterval(function() {
-        //--------------------------------------------------//
-        //This is where the sorting happens                 //
-        //--------------------------------------------------//
+        //console.log(array);
+        //console.log(`comparing ${array[i]} and ${array[i+gap]}`);
 
-        if (limit <= 0) {
-          //------------------------------------------------//
-          //If the maximum size of our swappable elements   //
-          //  is zero, we've sorted the list                //
-          //------------------------------------------------//
+        if (sorted) {
 
-          clearInterval(sortLoop, 0, array.length, "red");
-          drawGraph(array);
-        } else if (i >= limit) {
-          //------------------------------------------------//
-          //If the indices we're evaluating have reached    //
-          //  the limit, we're at the end of our list of    //
-          //  unsorted numbers. We need to decrement our    //
-          //  upper limit, and reset our base index         //
-          //------------------------------------------------//
+          clearInterval(sortLoop);
+          setTimeout(function() {
+            drawGraph(array);
+          }, 10);
 
+          //console.log("stopping", array);
+        }
+
+        if (gap < 1) {
+          //console.log("gap = 0, once more");
+          //console.log("post-gap", array);
           i = 0;
-          limit--;
-          if (!swapped) {
-            //----------------------------------------------//
-            //If no swaps were made during the last loop    //
-            //  that means all of the elements were sorted  //
-            //  and we can clear the interval               //
-            //----------------------------------------------//
-
-            clearInterval(sortLoop);
-            drawGraph(array, 0, array.length, "red");
+          gap = 1;
+          if (lastRound) {
+            //console.log("last round over :(")
+            sorted = true;
           } else {
-            swapped = false;
+            //console.log("last round triggered");
+            lastRound = true;
           }
-        } else if (array[i] > array[i + 1]) {
-          //------------------------------------------------//
-          //If the index we're evaluating is greater than   //
-          //  the next index, we swap the values and        //
-          //  increment our index                           //
-          //------------------------------------------------//
+        }
 
-          swap(i, (i+1));
-          drawGraph(array, (limit + 1), (array.length - 1), "red", i, "red");
+        if ((i + gap) >= array.length) {
+          i = 0;
+          gap = Math.floor(gap / shrink);
+          //console.log(`end of array, new gap is ${gap}`);
+          //console.log(array);
+        } else if (array[i] > array[i+gap]) {
+          //console.log(`${array[i]} is greater than ${array[i+gap]}, swapping`);
+          swap(i, (i+gap));
           i++;
-          swapped = true;
+          drawGraph(array, i, i, "blue", (i+gap), "blue");
         } else {
-          //------------------------------------------------//
-          //If the index we're evaluating is less than or   //
-          //  equal to the next index, we do nothing and    //
-          //  increment the base index                      //
-          //------------------------------------------------//
-
-          drawGraph(array, limit, (array.length - 1), "red", i, "red");
+          //console.log(`${array[i]} is not greater than ${array[i+gap]}`);
           i++;
+          drawGraph(array, i, i, "blue", (i+gap), "blue");
         }
 
       }, 1);
@@ -182,7 +170,6 @@
 
     let array = makeArray(size);
     drawGraph(array);
-
     sort(array);
 
   </script>
